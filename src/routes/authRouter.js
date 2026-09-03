@@ -8,6 +8,8 @@ const registerValidation = [
     body('email').trim().notEmpty().withMessage('Email is required').isEmail().withMessage('Please provide a valid email address'),
     body('password').trim().notEmpty().withMessage('Password is required').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
     body('confirm_password').trim().notEmpty().withMessage('Confirm Password is required'),
+    body('carInfo').if((value, { req }) => req.body.role === 'driver').trim().notEmpty().withMessage('Car information is required for drivers'),
+    body('licensenumber').if((value, { req }) => req.body.role === 'driver').trim().notEmpty().withMessage('License number is required for drivers')
 ];
 
 const loginValidation = [

@@ -10,8 +10,8 @@ exports.register = async (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-    const { name, email, password, confirm_password, role } = req.body;
     try {
+        const { name, email, password, confirm_password, role, carInfo, licensenumber } = req.body;
         //check if all fields are provided
         if (!name || !email || !password || !confirm_password) {
             return res.status(400).json({ message: 'Please provide all required fields' });
@@ -32,6 +32,14 @@ exports.register = async (req, res, next) => {
         // Check if confirm password is valid
         if (!confirm_password || typeof confirm_password !== 'string' || confirm_password.length < 6) {
             return res.status(400).json({ message: 'Confirm Password must be a non-empty string with at least 6 characters' });
+        }
+        if (role === 'driver') {
+            if (!carInfo || !carInfo.trim()) {
+                return res.status(400).json({ message: 'Car information is required for drivers' });
+            }
+            if (!licensenumber || !licensenumber.trim()) {
+                return res.status(400).json({ message: 'License number is required for drivers' });
+            }
         }
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -60,8 +68,10 @@ exports.register = async (req, res, next) => {
         await user.save();
         if(role === 'driver'){
             const driver = new Driver({
-                userId: user._id
-            })
+                userId: user._id,
+                carInfo: carInfo.trim(),
+                licensenumber: licensenumber.trim()
+            });
             await driver.save();
         }
 
